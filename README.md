@@ -5,9 +5,19 @@ A 16:9 realtime dashboard for League of Legends ARAM / ARAM Mayhem, designed to 
 ## Requirements (Windows 11)
 
 - League of Legends installed and running a game (the Live Client API is only available while you are in a match).
-- [Node.js 18+](https://nodejs.org/en/download) (LTS recommended).
 
-## Install & run
+## Install (Windows installer — easiest)
+
+Download the latest `aram-dash-setup-<version>.exe` from the
+[Releases page](https://github.com/cheesejaguar/aram-dash/releases) and run it.
+The installer bundles Node.js, so nothing else needs to be installed. Launch
+**ARAM Mayhem Dashboard** from the Start Menu and your browser will open
+automatically at `http://localhost:3000`. Close the console window to stop the
+server.
+
+## Run from source
+
+Requires [Node.js 18+](https://nodejs.org/en/download) (LTS recommended).
 
 Open PowerShell in the project folder and run:
 
@@ -52,4 +62,21 @@ Example:
 
 ```powershell
 $env:PORT=4000; npm start
+```
+
+When launching via the installed `aram-dash.exe`, set `OPEN_BROWSER=0` to
+suppress the automatic browser launch.
+
+## Releasing
+
+Pushing a tag matching `v*` triggers `.github/workflows/release.yml`, which
+builds the Windows executable with [`@yao-pkg/pkg`](https://github.com/yao-pkg/pkg),
+wraps it in an [Inno Setup](https://jrsoftware.org/isinfo.php) installer on a
+`windows-latest` runner, and attaches `aram-dash-setup-<version>.exe` to the
+GitHub Release. Manual `workflow_dispatch` runs build the installer as a
+workflow artifact without publishing a release.
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
 ```

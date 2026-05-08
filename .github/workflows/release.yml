@@ -1,0 +1,76 @@
+name: Build Windows Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version label for the build (e.g. 1.0.0). No release is published for manual runs.'
+        required: false
+        default: '0.0.0-dev'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            RAW="${GITHUB_REF#refs/tags/}"
+          else
+            RAW="${{ github.event.inputs.version }}"
+          fi
+          # Strip any leading "v" so Inno Setup gets a numeric version.
+          NUM="${RAW#v}"
+          echo "raw=${RAW}" >> "$GITHUB_OUTPUT"
+          echo "num=${NUM}" >> "$GITHUB_OUTPUT"
+          echo "Building version raw=${RAW} num=${NUM}"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build single-file Windows executable
+        run: npx --no-install pkg . --targets node20-win-x64 --output dist/aram-dash.exe
+
+      - name: Build installer with Inno Setup
+        shell: cmd
+        run: '"%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ steps.version.outputs.num }} installer\aram-dash.iss'
+
+      - name: List build artifacts
+        shell: bash
+        run: ls -la dist/
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aram-dash-installer-${{ steps.version.outputs.raw }}
+          path: |
+            dist/aram-dash-setup-*.exe
+            dist/aram-dash.exe
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ARAM Mayhem Dashboard ${{ steps.version.outputs.raw }}
+          tag_name: ${{ steps.version.outputs.raw }}
+          generate_release_notes: true
+          files: |
+            dist/aram-dash-setup-*.exe

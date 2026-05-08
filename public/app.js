@@ -12,6 +12,8 @@
   const TPL = document.getElementById('playerCardTpl');
   const FEED_LIST = document.getElementById('eventFeed');
   const MODE_LINE = document.getElementById('modeLine');
+  const GOLDBAR = document.querySelector('.goldbar');
+  const MAYHEM_BANNER = document.getElementById('mayhemBanner');
 
   // 1x1 transparent png so onerror failures don't show a broken-image glyph.
   const BLANK_IMG =
@@ -23,7 +25,55 @@
   let online = false;
   let lastOrderKills = 0;
   let lastChaosKills = 0;
+  let itemCosts = {};
   const cardByPlayerKey = new Map();
+
+  // Per-team gold-equivalent constants (item value + estimated income).
+  // The Live Client API does not expose live gold for non-spectated players,
+  // so we approximate from item totals + ARAM's passive gold rate.
+  const ARAM_START_GOLD = 500;
+  const ARAM_INCOME_PER_SEC = 3.25;
+
+  // ---------- Mayhem modifier registry ----------
+
+  // Casters set the active modifier via ?modifier=<key> on the dashboard URL.
+  // Optional ?modifierLabel= / ?modifierSub= override the registry for ad-hoc
+  // events. The banner stays hidden when neither the URL nor ARAMMAYHEM mode
+  // is detected, so this dashboard is also useful for plain ARAM.
+  const MAYHEM_MODIFIERS = {
+    urf:        { label: 'URF Mayhem',          sub: '80% CDR · No Mana',          icon: '⚡' },
+    spellbook:  { label: 'Ultimate Spellbook',  sub: 'Random Ult Replaces D',      icon: '✨' },
+    oneforall:  { label: 'One For All',         sub: 'Mirror Match',               icon: '🪞' },
+    ofa:        { label: 'One For All',         sub: 'Mirror Match',               icon: '🪞' },
+    lowgrav:    { label: 'Low Gravity',         sub: 'Reduced Gravity',            icon: '🌙' },
+    allchaos:   { label: 'All Chaos',           sub: 'Random Effects',             icon: '🎲' },
+    arurf:      { label: 'AR URF',              sub: 'All Random URF',             icon: '⚡' },
+    aram:       { label: 'Classic ARAM',        sub: 'No Modifier',                icon: '❄' },
+    snowball:   { label: 'Snow Day',            sub: 'Snowballs Galore',           icon: '❄' },
+    poke:       { label: 'Poke Mayhem',         sub: 'Ranged Buffed',              icon: '🏹' },
+    pentakill:  { label: 'Pentakill Hunt',      sub: 'Bonus on Pentas',            icon: '⚔' },
+  };
+
+  function resolveModifier() {
+    const params = new URLSearchParams(location.search);
+    const key = (params.get('modifier') || '').toLowerCase().replace(/[^a-z]/g, '');
+    const labelOverride = params.get('modifierLabel');
+    const subOverride = params.get('modifierSub');
+    if (!key && !labelOverride) return null;
+    const base = MAYHEM_MODIFIERS[key] || {
+      label: key
+        ? key.charAt(0).toUpperCase() + key.slice(1) + ' Mayhem'
+        : 'Mayhem',
+      sub: 'Modifier Active',
+      icon: '⚡',
+    };
+    return {
+      label: labelOverride || base.label,
+      sub: subOverride || base.sub,
+      icon: base.icon,
+    };
+  }
+  const userModifier = resolveModifier();
 
   // ---------- DDragon helpers ----------
 
@@ -77,6 +127,20 @@
     if (!dn) return '';
     if (dn.startsWith('Summoner')) return dn;
     return `Summoner${dn}`;
+  }
+
+  // ARAM's Mark / Dash snowball summoner. The Live Client API surfaces it under
+  // a few names depending on patch (SummonerSnowURFSnowball_Mark, SummonerMark,
+  // SummonerSnowball, SummonerSnowURFSnowball), so we sniff multiple fields.
+  function isSnowballSpell(spell, key) {
+    if (!spell && !key) return false;
+    const haystack = [
+      key || '',
+      spell?.rawDescription || '',
+      spell?.rawDisplayName || '',
+      spell?.displayName || '',
+    ].join(' ').toLowerCase();
+    return /snowball|snowurf|summonermark\b|\bmark\b|snow_day/.test(haystack);
   }
 
   function playerName(p) {
@@ -138,7 +202,7 @@
     return node;
   }
 
-  function renderTeam(parent, players) {
+  function renderTeam(parent, players, teamKills) {
     const wantedKeys = new Set(players.map(playerKey));
     for (const [key, node] of cardByPlayerKey) {
       if (node.parentElement === parent && !wantedKeys.has(key)) {
@@ -150,11 +214,11 @@
     for (const p of players) {
       const card = ensureCard(parent, p);
       parent.appendChild(card);
-      updateCard(card, p);
+      updateCard(card, p, teamKills);
     }
   }
 
-  function updateCard(card, p) {
+  function updateCard(card, p, teamKills) {
     const portrait = card.querySelector('.portrait');
     const champUrl = ddragonChampion(championKey(p));
     if (portrait.dataset.url !== champUrl) {
@@ -168,6 +232,8 @@
 
     const spell1Img = card.querySelector('.spell-1');
     const spell2Img = card.querySelector('.spell-2');
+    const wrap1 = card.querySelector('.spell-wrap-1');
+    const wrap2 = card.querySelector('.spell-wrap-2');
     const k1 = spellKey(p.summonerSpells?.summonerSpellOne);
     const k2 = spellKey(p.summonerSpells?.summonerSpellTwo);
     if (spell1Img.dataset.key !== k1) {
@@ -180,6 +246,8 @@
       spell2Img.src = ddragonSpell(k2);
       spell2Img.alt = p.summonerSpells?.summonerSpellTwo?.displayName || '';
     }
+    wrap1.classList.toggle('is-snowball', isSnowballSpell(p.summonerSpells?.summonerSpellOne, k1));
+    wrap2.classList.toggle('is-snowball', isSnowballSpell(p.summonerSpells?.summonerSpellTwo, k2));
 
     const sc = p.scores || {};
     card.querySelector('.k').textContent = sc.kills ?? 0;
@@ -219,6 +287,14 @@
       card.classList.remove('dead');
       death.hidden = true;
     }
+
+    const kills = sc.kills || 0;
+    const assists = sc.assists || 0;
+    const denom = Math.max(1, teamKills || 0);
+    const kp = teamKills > 0 ? Math.min(1, (kills + assists) / denom) : 0;
+    const pct = Math.round(kp * 100);
+    card.querySelector('.kp-val').textContent = `${pct}%`;
+    card.querySelector('.kp-bar-fill').style.width = `${pct}%`;
   }
 
   // ---------- events ----------
@@ -368,6 +444,7 @@
     TOPBAR.hidden = !on;
     TEAMS.hidden = !on;
     FEED.hidden = !on;
+    GOLDBAR.hidden = !on;
     if (!on) {
       // Game ended / disconnected: reset for the next game.
       cardByPlayerKey.clear();
@@ -378,6 +455,9 @@
       lastGameTime = -1;
       lastOrderKills = 0;
       lastChaosKills = 0;
+      MAYHEM_BANNER.hidden = true;
+      document.getElementById('orderGoldFill').style.width = '0%';
+      document.getElementById('chaosGoldFill').style.width = '0%';
       document.title = 'ARAM Mayhem Dashboard';
     }
   }
@@ -391,6 +471,76 @@
     lastGameTime = currentGameTime;
   }
 
+  // ---------- Mayhem banner ----------
+
+  function renderMayhemBanner(isMayhemMode) {
+    // Casters set the active modifier via ?modifier=. Without that hint we
+    // still surface a generic banner whenever ARAMMAYHEM mode is detected.
+    const m = userModifier || (isMayhemMode
+      ? { label: 'Mayhem', sub: 'Modifier Active', icon: '⚡' }
+      : null);
+    if (!m) {
+      MAYHEM_BANNER.hidden = true;
+      return;
+    }
+    MAYHEM_BANNER.hidden = false;
+    const labelEl = document.getElementById('mayhemLabel');
+    const subEl = document.getElementById('mayhemSub');
+    const iconEl = MAYHEM_BANNER.querySelector('.mayhem-icon');
+    if (labelEl.textContent !== m.label) labelEl.textContent = m.label;
+    if (subEl.textContent !== m.sub) subEl.textContent = m.sub;
+    if (iconEl.textContent !== m.icon) iconEl.textContent = m.icon;
+  }
+
+  // ---------- Team gold ----------
+
+  function teamGold(players, gameTime) {
+    let g = 0;
+    for (const p of players) {
+      g += ARAM_START_GOLD;
+      const items = p.items || [];
+      for (const it of items) {
+        const cost = itemCosts[String(it.itemID)] || 0;
+        const count = typeof it.count === 'number' ? it.count : 1;
+        g += cost * count;
+      }
+    }
+    g += players.length * Math.max(0, gameTime || 0) * ARAM_INCOME_PER_SEC;
+    return Math.round(g);
+  }
+
+  function fmtGold(n) {
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+    return String(n);
+  }
+
+  function renderGoldBar(orderGold, chaosGold) {
+    GOLDBAR.hidden = false;
+    document.getElementById('orderGold').textContent = fmtGold(orderGold);
+    document.getElementById('chaosGold').textContent = fmtGold(chaosGold);
+    const max = Math.max(1, orderGold, chaosGold);
+    document.getElementById('orderGoldFill').style.width = `${(orderGold / max) * 100}%`;
+    document.getElementById('chaosGoldFill').style.width = `${(chaosGold / max) * 100}%`;
+    const diff = orderGold - chaosGold;
+    const orderDelta = document.getElementById('orderGoldDelta');
+    const chaosDelta = document.getElementById('chaosGoldDelta');
+    if (diff > 0) {
+      orderDelta.textContent = `+${fmtGold(diff)}`;
+      orderDelta.className = 'goldbar-delta up';
+      chaosDelta.textContent = '';
+      chaosDelta.className = 'goldbar-delta';
+    } else if (diff < 0) {
+      chaosDelta.textContent = `+${fmtGold(-diff)}`;
+      chaosDelta.className = 'goldbar-delta up';
+      orderDelta.textContent = '';
+      orderDelta.className = 'goldbar-delta';
+    } else {
+      orderDelta.textContent = '';
+      chaosDelta.textContent = '';
+      orderDelta.className = chaosDelta.className = 'goldbar-delta';
+    }
+  }
+
   // ---------- main loop ----------
 
   function render(data) {
@@ -402,11 +552,14 @@
 
     const mode = (gd.gameMode || '').toUpperCase();
     const isAram = mode === 'ARAM' || mode === 'ARAMMAYHEM' || gd.mapNumber === 12 || gd.mapNumber === 14;
+    const isMayhem = mode === 'ARAMMAYHEM';
     MODE_LINE.textContent = isAram
       ? gd.mapNumber === 14
         ? "Butcher's Bridge — Mayhem"
         : 'Howling Abyss — Mayhem'
       : `${gd.gameMode || 'Live'} — ${gd.mapName || ''}`;
+
+    renderMayhemBanner(isMayhem);
 
     const players = Array.isArray(data.allPlayers) ? data.allPlayers : [];
     const order = players.filter((p) => p.team === 'ORDER');
@@ -420,8 +573,12 @@
     lastOrderKills = orderKills;
     lastChaosKills = chaosKills;
 
-    renderTeam(TEAM_ORDER, order);
-    renderTeam(TEAM_CHAOS, chaos);
+    renderTeam(TEAM_ORDER, order, orderKills);
+    renderTeam(TEAM_CHAOS, chaos, chaosKills);
+
+    const orderGold = teamGold(order, t);
+    const chaosGold = teamGold(chaos, t);
+    renderGoldBar(orderGold, chaosGold);
 
     const events = data.events?.Events || [];
     renderInhibs(
@@ -476,9 +633,18 @@
     } catch {}
   }
 
+  async function fetchItemCosts() {
+    try {
+      const r = await fetch('/api/itemcosts');
+      const j = await r.json();
+      if (j && j.costs) itemCosts = j.costs;
+    } catch {}
+  }
+
   (async function main() {
-    await fetchVersion();
+    await Promise.all([fetchVersion(), fetchItemCosts()]);
     setInterval(fetchVersion, 60 * 60 * 1000);
+    setInterval(fetchItemCosts, 60 * 60 * 1000);
     tick();
   })();
 })();

@@ -314,13 +314,13 @@ html, body {
 
 .teams {
   position: absolute;
-  top: 130px;
+  top: 226px;
   left: 0; right: 0;
   bottom: 200px;
   display: grid;
   grid-template-columns: 1fr 100px 1fr;
   gap: 18px;
-  padding: 26px 32px;
+  padding: 14px 32px 26px;
 }
 .team {
   display: grid;
@@ -837,4 +837,226 @@ html, body {
 @keyframes pulse {
   0%, 100% { transform: scale(1);   opacity: 0.9;  box-shadow: 0 0 14px var(--gold-glow); }
   50%      { transform: scale(1.6); opacity: 0.25; box-shadow: 0 0 22px var(--gold-glow); }
+}
+
+/* =========================================================
+ * Mayhem modifier banner (anchored under the central timer)
+ * ========================================================= */
+
+.timer { overflow: visible; }
+.mayhem-banner {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 10px;
+  background: linear-gradient(180deg, rgba(240,192,96,0.18), rgba(0,0,0,0.55));
+  border: 1px solid rgba(240,192,96,0.55);
+  border-radius: 999px;
+  box-shadow: 0 0 22px rgba(240,192,96,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  white-space: nowrap;
+  z-index: 6;
+  animation: mayhemIn 380ms cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes mayhemIn {
+  from { transform: translate(-50%, -6px); opacity: 0; }
+  to   { transform: translate(-50%, 0);    opacity: 1; }
+}
+.mayhem-icon {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-bright) 10%, var(--gold-deep) 70%);
+  color: #1a1407;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  flex: none;
+}
+.mayhem-stack { line-height: 1.05; }
+.mayhem-label {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.mayhem-sub {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+
+/* =========================================================
+ * Team gold bar (sits between topbar and teams)
+ * ========================================================= */
+
+.goldbar {
+  position: absolute;
+  top: 168px;
+  left: 32px;
+  right: 32px;
+  height: 50px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: center;
+  z-index: 4;
+}
+.goldbar-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.goldbar-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.goldbar-side.chaos .goldbar-meta {
+  justify-content: flex-end;
+}
+.goldbar-team {
+  font-weight: 700;
+}
+.goldbar-side.order .goldbar-team { color: var(--order); }
+.goldbar-side.chaos .goldbar-team { color: var(--chaos); }
+.goldbar-value {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-bright);
+  text-shadow: 0 0 6px rgba(240,192,96,0.35);
+}
+.goldbar-delta {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+}
+.goldbar-delta.up {
+  color: var(--gold-bright);
+  text-shadow: 0 0 6px rgba(240,192,96,0.4);
+}
+.goldbar-track {
+  position: relative;
+  height: 6px;
+  background: rgba(220,226,245,0.05);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.goldbar-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  transition: width 600ms cubic-bezier(.2,.8,.2,1);
+}
+.goldbar-fill.order {
+  left: 0;
+  background: linear-gradient(90deg, var(--order-deep), var(--order));
+  box-shadow: 0 0 12px var(--order-glow);
+}
+.goldbar-side.chaos .goldbar-track { transform: scaleX(1); }
+.goldbar-fill.chaos {
+  right: 0;
+  left: auto;
+  background: linear-gradient(270deg, var(--chaos-deep), var(--chaos));
+  box-shadow: 0 0 12px var(--chaos-glow);
+}
+
+/* =========================================================
+ * Snowball / Mark spell highlight
+ * ========================================================= */
+
+.spell-wrap {
+  position: relative;
+  display: inline-block;
+}
+.spell-wrap .spell-tag {
+  display: none;
+}
+.spell-wrap.is-snowball .spell {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 1px var(--gold),
+    0 0 12px rgba(240,192,96,0.45),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+.spell-wrap.is-snowball .spell-tag {
+  display: block;
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold-deep));
+  color: #1a1407;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+/* =========================================================
+ * Per-player kill participation
+ * ========================================================= */
+
+.stat.kp .kp-icon {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(240,192,96,0.10);
+  color: var(--gold-bright);
+  border: 1px solid rgba(240,192,96,0.30);
+}
+.stat.kp .kp-val { font-weight: 700; color: var(--gold-bright); }
+
+.kp-bar {
+  position: relative;
+  height: 4px;
+  margin-top: 6px;
+  background: rgba(220,226,245,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.kp-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  transition: width 500ms cubic-bezier(.2,.8,.2,1);
+}
+.team-order .kp-bar-fill {
+  background: linear-gradient(90deg, var(--order-deep), var(--order));
+  box-shadow: 0 0 10px var(--order-glow);
+}
+.team-chaos .kp-bar { transform: scaleX(-1); }
+.team-chaos .kp-bar-fill {
+  background: linear-gradient(90deg, var(--chaos-deep), var(--chaos));
+  box-shadow: 0 0 10px var(--chaos-glow);
 }

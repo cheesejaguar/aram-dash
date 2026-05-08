@@ -21,6 +21,8 @@
   let seenEventIds = new Set();
   let lastGameTime = -1;
   let online = false;
+  let lastOrderKills = 0;
+  let lastChaosKills = 0;
   const cardByPlayerKey = new Map();
 
   // ---------- DDragon helpers ----------
@@ -347,6 +349,18 @@
 
   // ---------- state transitions ----------
 
+  function setKillCount(elId, current, previous) {
+    const el = document.getElementById(elId);
+    if (el.textContent === String(current)) return;
+    el.textContent = current;
+    if (current > previous) {
+      el.classList.remove('flash');
+      // Force a reflow so re-adding the class restarts the animation.
+      void el.offsetWidth;
+      el.classList.add('flash');
+    }
+  }
+
   function setOnline(on) {
     if (on === online) return;
     online = on;
@@ -362,6 +376,8 @@
       FEED_LIST.innerHTML = '';
       seenEventIds = new Set();
       lastGameTime = -1;
+      lastOrderKills = 0;
+      lastChaosKills = 0;
       document.title = 'ARAM Mayhem Dashboard';
     }
   }
@@ -399,8 +415,10 @@
     let orderKills = 0, chaosKills = 0;
     for (const p of order) orderKills += p.scores?.kills || 0;
     for (const p of chaos) chaosKills += p.scores?.kills || 0;
-    document.getElementById('orderKills').textContent = orderKills;
-    document.getElementById('chaosKills').textContent = chaosKills;
+    setKillCount('orderKills', orderKills, lastOrderKills);
+    setKillCount('chaosKills', chaosKills, lastChaosKills);
+    lastOrderKills = orderKills;
+    lastChaosKills = chaosKills;
 
     renderTeam(TEAM_ORDER, order);
     renderTeam(TEAM_CHAOS, chaos);

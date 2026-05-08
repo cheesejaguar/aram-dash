@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ARAM Mayhem Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="stage" class="stage">
+      <div id="offline" class="offline">
+        <div class="offline-card">
+          <div class="offline-title">Waiting for League client</div>
+          <div class="offline-sub">Start a game with the Live Client API on <code>localhost:2999</code></div>
+          <div class="offline-dot"></div>
+        </div>
+      </div>
+
+      <header class="topbar" hidden>
+        <div class="brand">
+          <div class="brand-mark">A</div>
+          <div class="brand-stack">
+            <div class="brand-title">ARAM <span>Mayhem</span></div>
+            <div class="brand-sub" id="modeLine">Howling Abyss</div>
+          </div>
+        </div>
+
+        <div class="score">
+          <div class="team-block order">
+            <div class="team-label">Order</div>
+            <div class="team-kills" id="orderKills">0</div>
+          </div>
+          <div class="timer">
+            <div class="timer-clock" id="gameClock">00:00</div>
+            <div class="timer-label">Game Time</div>
+          </div>
+          <div class="team-block chaos">
+            <div class="team-kills" id="chaosKills">0</div>
+            <div class="team-label">Chaos</div>
+          </div>
+        </div>
+
+        <div class="objectives">
+          <div class="obj-side order">
+            <div class="obj-title">Order Inhibs</div>
+            <div class="obj-row" id="orderInhibs">
+              <div class="inhib" data-lane="C"></div>
+            </div>
+          </div>
+          <div class="obj-side chaos">
+            <div class="obj-title">Chaos Inhibs</div>
+            <div class="obj-row" id="chaosInhibs">
+              <div class="inhib" data-lane="C"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="teams" hidden>
+        <section class="team team-order" id="teamOrder"></section>
+        <div class="versus">
+          <div class="vs-line"></div>
+          <div class="vs-text">VS</div>
+          <div class="vs-line"></div>
+        </div>
+        <section class="team team-chaos" id="teamChaos"></section>
+      </main>
+
+      <footer class="feed" hidden>
+        <div class="feed-title">Event Feed</div>
+        <div class="feed-list" id="eventFeed"></div>
+      </footer>
+    </div>
+
+    <template id="playerCardTpl">
+      <div class="card">
+        <div class="card-portrait">
+          <img class="portrait" alt="" />
+          <div class="level-badge">1</div>
+          <div class="death-overlay" hidden>
+            <div class="death-label">Respawn</div>
+            <div class="death-time">0s</div>
+          </div>
+        </div>
+        <div class="card-main">
+          <div class="card-row card-head">
+            <div class="card-names">
+              <div class="summoner-name"></div>
+              <div class="champion-name"></div>
+            </div>
+            <div class="spells">
+              <img class="spell spell-1" alt="" />
+              <img class="spell spell-2" alt="" />
+            </div>
+          </div>
+          <div class="card-row card-stats">
+            <div class="stat kda"><span class="k">0</span>/<span class="d">0</span>/<span class="a">0</span></div>
+            <div class="stat cs"><span class="cs-icon">CS</span> <span class="cs-val">0</span></div>
+            <div class="stat wards"><span class="wards-icon">W</span> <span class="wards-val">0</span></div>
+          </div>
+          <div class="items">
+            <div class="item slot" data-slot="0"></div>
+            <div class="item slot" data-slot="1"></div>
+            <div class="item slot" data-slot="2"></div>
+            <div class="item slot" data-slot="3"></div>
+            <div class="item slot" data-slot="4"></div>
+            <div class="item slot" data-slot="5"></div>
+            <div class="item trinket" data-slot="6"></div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

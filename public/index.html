@@ -33,6 +33,13 @@
           <div class="timer">
             <div class="timer-clock" id="gameClock">00:00</div>
             <div class="timer-label">Game Time</div>
+            <div class="mayhem-banner" id="mayhemBanner" hidden>
+              <div class="mayhem-icon">⚡</div>
+              <div class="mayhem-stack">
+                <div class="mayhem-label" id="mayhemLabel">Mayhem</div>
+                <div class="mayhem-sub" id="mayhemSub">Modifier Active</div>
+              </div>
+            </div>
           </div>
           <div class="team-block chaos">
             <div class="team-kills" id="chaosKills">0</div>
@@ -55,6 +62,29 @@
           </div>
         </div>
       </header>
+
+      <section class="goldbar" hidden>
+        <div class="goldbar-side order">
+          <div class="goldbar-meta">
+            <span class="goldbar-team">Order Gold</span>
+            <span class="goldbar-value" id="orderGold">0</span>
+            <span class="goldbar-delta" id="orderGoldDelta"></span>
+          </div>
+          <div class="goldbar-track">
+            <div class="goldbar-fill order" id="orderGoldFill"></div>
+          </div>
+        </div>
+        <div class="goldbar-side chaos">
+          <div class="goldbar-meta">
+            <span class="goldbar-delta" id="chaosGoldDelta"></span>
+            <span class="goldbar-value" id="chaosGold">0</span>
+            <span class="goldbar-team">Chaos Gold</span>
+          </div>
+          <div class="goldbar-track">
+            <div class="goldbar-fill chaos" id="chaosGoldFill"></div>
+          </div>
+        </div>
+      </section>
 
       <main class="teams" hidden>
         <section class="team team-order" id="teamOrder"></section>
@@ -89,14 +119,21 @@
               <div class="champion-name"></div>
             </div>
             <div class="spells">
-              <img class="spell spell-1" alt="" />
-              <img class="spell spell-2" alt="" />
+              <div class="spell-wrap spell-wrap-1">
+                <img class="spell spell-1" alt="" />
+                <span class="spell-tag">MARK</span>
+              </div>
+              <div class="spell-wrap spell-wrap-2">
+                <img class="spell spell-2" alt="" />
+                <span class="spell-tag">MARK</span>
+              </div>
             </div>
           </div>
           <div class="card-row card-stats">
             <div class="stat kda"><span class="k">0</span>/<span class="d">0</span>/<span class="a">0</span></div>
             <div class="stat cs"><span class="cs-icon">CS</span> <span class="cs-val">0</span></div>
             <div class="stat wards"><span class="wards-icon">W</span> <span class="wards-val">0</span></div>
+            <div class="stat kp"><span class="kp-icon">KP</span> <span class="kp-val">0%</span></div>
           </div>
           <div class="items">
             <div class="item slot" data-slot="0"><span class="item-count"></span></div>
@@ -107,6 +144,7 @@
             <div class="item slot" data-slot="5"><span class="item-count"></span></div>
             <div class="item trinket" data-slot="6"><span class="item-count"></span></div>
           </div>
+          <div class="kp-bar"><div class="kp-bar-fill"></div></div>
         </div>
       </div>
     </template>

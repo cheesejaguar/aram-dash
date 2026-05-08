@@ -61,11 +61,56 @@ function getDdragonVersion() {
   });
 }
 
+let cachedItemCosts = null;
+let cachedItemCostsAt = 0;
+let cachedItemCostsVersion = null;
+function getItemCosts() {
+  const now = Date.now();
+  const fresh = cachedItemCosts && now - cachedItemCostsAt < 60 * 60 * 1000;
+  if (fresh) return Promise.resolve(cachedItemCosts);
+  return getDdragonVersion().then(
+    (v) =>
+      new Promise((resolve) => {
+        https
+          .get(
+            `https://ddragon.leagueoflegends.com/cdn/${v}/data/en_US/item.json`,
+            (res) => {
+              let body = '';
+              res.on('data', (c) => (body += c));
+              res.on('end', () => {
+                try {
+                  const data = JSON.parse(body);
+                  const out = {};
+                  for (const [id, info] of Object.entries(data.data || {})) {
+                    if (info && info.gold && typeof info.gold.total === 'number') {
+                      out[id] = info.gold.total;
+                    }
+                  }
+                  cachedItemCosts = out;
+                  cachedItemCostsAt = now;
+                  cachedItemCostsVersion = v;
+                  resolve(out);
+                } catch {
+                  resolve(cachedItemCosts || {});
+                }
+              });
+            }
+          )
+          .on('error', () => resolve(cachedItemCosts || {}));
+      })
+  );
+}
+
 const app = express();
 
 app.get('/api/version', async (_req, res) => {
   const v = await getDdragonVersion();
   res.json({ version: v });
+});
+
+app.get('/api/itemcosts', async (_req, res) => {
+  const costs = await getItemCosts();
+  res.json({ version: cachedItemCostsVersion, costs });
 });
 
 const proxied = [
@@ -100,4 +145,5 @@ app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] })
 app.listen(PORT, () => {
   console.log(`ARAM Mayhem dashboard:  http://localhost:${PORT}`);
   console.log(`Proxying Riot Live Client API at https://${RIOT_HOST}:${RIOT_PORT}`);
+  getItemCosts().catch(() => {});
 });

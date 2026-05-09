@@ -210,10 +210,16 @@
         cardByPlayerKey.delete(key);
       }
     }
-    // Append in the order returned by the API so positions are stable.
-    for (const p of players) {
+    // Reorder only when the API ordering doesn't match the live DOM. Re-inserting
+    // a node that's already in place restarts the cardIn CSS animation, which at
+    // the 1Hz poll rate reads as a flicker.
+    for (let i = 0; i < players.length; i++) {
+      const p = players[i];
       const card = ensureCard(parent, p);
-      parent.appendChild(card);
+      const expected = parent.children[i];
+      if (expected !== card) {
+        parent.insertBefore(card, expected || null);
+      }
       updateCard(card, p, teamKills);
     }
   }

@@ -142,8 +142,24 @@ for (const ep of proxied) {
 
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
-app.listen(PORT, () => {
-  console.log(`ARAM Mayhem dashboard:  http://localhost:${PORT}`);
-  console.log(`Proxying Riot Live Client API at https://${RIOT_HOST}:${RIOT_PORT}`);
-  getItemCosts().catch(() => {});
-});
+function startServer(port = PORT) {
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, () => {
+      const actualPort = server.address().port;
+      console.log(`ARAM Mayhem dashboard:  http://localhost:${actualPort}`);
+      console.log(`Proxying Riot Live Client API at https://${RIOT_HOST}:${RIOT_PORT}`);
+      getItemCosts().catch(() => {});
+      resolve({ server, port: actualPort });
+    });
+    server.on('error', reject);
+  });
+}
+
+module.exports = { app, startServer };
+
+if (require.main === module) {
+  startServer().catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
+}

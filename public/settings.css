@@ -1,0 +1,237 @@
+/* Settings page — uses the dashboard's color tokens defined in styles.css */
+
+html, body.settings-body {
+  overflow: auto;
+  background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);
+  height: auto;
+  min-height: 100%;
+}
+
+.settings-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 28px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.75), rgba(0,0,0,0.4));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.settings-back {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.settings-back:hover {
+  color: var(--text);
+  border-color: var(--gold);
+  background: rgba(240, 192, 96, 0.05);
+}
+
+.settings-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  flex: 1;
+}
+
+.settings-status {
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.03);
+  min-width: 120px;
+  text-align: center;
+}
+.settings-status[data-kind="ok"]    { color: #7fe6c1; background: rgba(127, 230, 193, 0.08); }
+.settings-status[data-kind="warn"]  { color: var(--gold-bright); background: rgba(240, 192, 96, 0.10); }
+.settings-status[data-kind="error"] { color: var(--chaos); background: rgba(255, 107, 107, 0.10); }
+
+.settings-main {
+  max-width: 880px;
+  margin: 32px auto;
+  padding: 0 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.settings-card {
+  background: linear-gradient(180deg, rgba(18, 24, 38, 0.85), rgba(9, 13, 24, 0.85));
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+
+.settings-card h2 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.settings-card > .settings-field:first-of-type { border-top: 0; padding-top: 0; }
+
+.settings-field > label {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-field input[type="text"],
+.settings-field input[type="number"],
+.settings-field select {
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  max-width: 340px;
+}
+.settings-field input:focus,
+.settings-field select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240, 192, 96, 0.18);
+}
+
+.settings-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 520px;
+}
+.settings-range input[type="range"] {
+  flex: 1;
+  accent-color: var(--gold);
+}
+.settings-range input[type="number"] {
+  width: 90px;
+  text-align: right;
+}
+.settings-unit {
+  color: var(--text-dim);
+  font-size: 13px;
+  min-width: 24px;
+}
+
+.settings-hint {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.settings-hint code {
+  background: rgba(255,255,255,0.05);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.settings-radio {
+  display: flex;
+  gap: 18px;
+}
+.settings-radio label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.settings-field-toggle { padding: 8px 0; }
+.settings-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.settings-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold);
+}
+.settings-toggle input[type="checkbox"]:disabled + span {
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.settings-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  background: rgba(240, 192, 96, 0.12);
+  border: 1px solid rgba(240, 192, 96, 0.35);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+  flex-wrap: wrap;
+}
+.settings-btn {
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  font-family: inherit;
+}
+.settings-btn:hover {
+  border-color: var(--gold);
+}
+.settings-btn.primary {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #1a1407;
+  border-color: var(--gold-bright);
+}
+.settings-btn.primary:hover { filter: brightness(1.08); }
+
+.settings-config-path {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  max-width: 360px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}

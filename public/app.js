@@ -1,6 +1,7 @@
 (() => {
-  const POLL_LIVE_MS = 1000;
-  const POLL_OFFLINE_MS = 2500;
+  let POLL_LIVE_MS = 1000;
+  let POLL_OFFLINE_MS = 2500;
+  let SETTINGS_DEFAULT_MODIFIER = '';
 
   const STAGE = document.getElementById('stage');
   const OFFLINE = document.getElementById('offline');
@@ -59,10 +60,11 @@
     const key = (params.get('modifier') || '').toLowerCase().replace(/[^a-z]/g, '');
     const labelOverride = params.get('modifierLabel');
     const subOverride = params.get('modifierSub');
-    if (!key && !labelOverride) return null;
-    const base = MAYHEM_MODIFIERS[key] || {
-      label: key
-        ? key.charAt(0).toUpperCase() + key.slice(1) + ' Mayhem'
+    const effectiveKey = key || SETTINGS_DEFAULT_MODIFIER;
+    if (!effectiveKey && !labelOverride) return null;
+    const base = MAYHEM_MODIFIERS[effectiveKey] || {
+      label: effectiveKey
+        ? effectiveKey.charAt(0).toUpperCase() + effectiveKey.slice(1) + ' Mayhem'
         : 'Mayhem',
       sub: 'Modifier Active',
       icon: '⚡',
@@ -73,7 +75,7 @@
       icon: base.icon,
     };
   }
-  const userModifier = resolveModifier();
+  let userModifier = resolveModifier();
 
   // ---------- DDragon helpers ----------
 
@@ -647,7 +649,28 @@
     } catch {}
   }
 
+  async function fetchSettings() {
+    try {
+      const r = await fetch('/api/settings');
+      const j = await r.json();
+      const cfg = j && j.config ? j.config : null;
+      if (!cfg) return;
+      if (cfg.dashboard) {
+        if (Number.isFinite(cfg.dashboard.pollLiveMs)) POLL_LIVE_MS = cfg.dashboard.pollLiveMs;
+        if (Number.isFinite(cfg.dashboard.pollOfflineMs)) POLL_OFFLINE_MS = cfg.dashboard.pollOfflineMs;
+        if (cfg.dashboard.defaultModifier) SETTINGS_DEFAULT_MODIFIER = cfg.dashboard.defaultModifier;
+        const theme = cfg.dashboard.theme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      // Recompute modifier in case query param was empty and a default is now set.
+      userModifier = resolveModifier();
+    } catch {
+      // Fall back to bundled defaults if /api/settings is unreachable.
+    }
+  }
+
   (async function main() {
+    await fetchSettings();
     await Promise.all([fetchVersion(), fetchItemCosts()]);
     setInterval(fetchVersion, 60 * 60 * 1000);
     setInterval(fetchItemCosts, 60 * 60 * 1000);

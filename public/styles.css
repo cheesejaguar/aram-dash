@@ -1060,3 +1060,34 @@ html, body {
   background: linear-gradient(90deg, var(--chaos-deep), var(--chaos));
   box-shadow: 0 0 10px var(--chaos-glow);
 }
+
+/* =========================================================
+ * Light theme overrides — re-skin only the tokens defined in :root.
+ * Activated by <html data-theme="light"> (set by app.js / settings.js).
+ * ========================================================= */
+
+[data-theme="light"] {
+  --bg-0:         #e7ebf2;
+  --bg-1:         #f1f3f8;
+  --bg-2:         #ffffff;
+
+  --line:         rgba(20, 26, 42, 0.10);
+  --line-strong:  rgba(20, 26, 42, 0.22);
+
+  --text:         #16192a;
+  --text-dim:     #4a5168;
+  --text-faint:   #8a92a7;
+
+  --order-deep:   #b8d6f2;
+  --chaos-deep:   #f2c4c4;
+
+  --gold:         #c89329;
+  --gold-bright:  #e6b14a;
+  --gold-deep:    #6c4d0e;
+  --gold-glow:    rgba(200, 147, 41, 0.35);
+}
+
+[data-theme="light"] html,
+[data-theme="light"] body {
+  background: var(--bg-0);
+}

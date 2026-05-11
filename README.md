@@ -71,20 +71,48 @@ The dashboard auto-scales to whatever 16:9 size you give it, so you can also dro
 
 ## Configuration
 
-Environment variables (optional):
+The dashboard ships with a built-in settings page. In the desktop app, open
+**File → Settings…** (or press `Ctrl+,` / `Cmd+,`). In a browser, navigate to
+`http://localhost:3000/settings`. The same page covers:
+
+- **Dashboard** — live + idle poll rate, default Mayhem modifier, dark/light theme.
+- **Network** — Riot Live Client host & port, dashboard HTTP port.
+- **Window** *(desktop only)* — always-on-top, fullscreen, 16:9 lock,
+  frameless OBS overlay mode, launch-at-startup (Windows/macOS), zoom.
+
+Settings persist to a JSON config file:
+
+- Desktop app: `<userData>/config.json` (e.g.
+  `%APPDATA%/ARAM Mayhem Dashboard/config.json` on Windows,
+  `~/Library/Application Support/ARAM Mayhem Dashboard/config.json` on macOS).
+- `npm start` / browser: `./config.json` next to `server.js`.
+
+Environment variables still work as one-shot overrides:
 
 - `PORT` — port for the dashboard (default `3000`)
 - `RIOT_HOST` — hostname for the Live Client API (default `127.0.0.1`)
 - `RIOT_PORT` — port for the Live Client API (default `2999`)
-
-Example:
+- `ARAM_CONFIG_PATH` — full path to a custom config file
 
 ```powershell
 $env:PORT=4000; npm start
 ```
 
-When launching via the installed `aram-dash.exe`, set `OPEN_BROWSER=0` to
-suppress the automatic browser launch.
+### Keyboard shortcuts (desktop app)
+
+| Shortcut         | Action                       |
+| ---------------- | ---------------------------- |
+| `Ctrl+,`         | Open settings                |
+| `Ctrl+D`         | Open dashboard               |
+| `Ctrl+R`         | Reload                       |
+| `Ctrl+Shift+I`   | Toggle DevTools              |
+| `Ctrl+0/-/=`     | Reset / zoom out / zoom in   |
+| `F11`            | Toggle fullscreen            |
+
+### System tray
+
+The desktop app installs a system-tray icon. Closing the window minimises to
+the tray; quit from the tray's context menu or **File → Quit**.
 
 ## Releasing
 

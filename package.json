@@ -43,14 +43,17 @@
     "files": [
       "electron/**/*",
       "server.js",
+      "settings.js",
       "public/**/*",
+      "build/icon.png",
       "package.json",
       "!**/node_modules/@yao-pkg/**",
       "!**/*.{md,iss}",
       "!installer/**",
       "!bin/**",
       "!dist/**",
-      "!dist-electron/**"
+      "!dist-electron/**",
+      "!build/generate-icon.js"
     ],
     "asar": true,
     "win": {
@@ -68,6 +71,7 @@
           ]
         }
       ],
+      "icon": "build/icon.png",
       "artifactName": "aram-dash-${version}-${os}-${arch}.${ext}"
     },
     "nsis": {
@@ -88,6 +92,7 @@
           ]
         }
       ],
+      "icon": "build/icon.png",
       "category": "public.app-category.utilities"
     },
     "linux": {
@@ -99,6 +104,7 @@
           ]
         }
       ],
+      "icon": "build/icon.png",
       "category": "Utility"
     }
   }

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Settings · ARAM Mayhem Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f0c060'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Segoe UI,Arial' font-size='38' font-weight='900' fill='%231a1407'%3EA%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body class="settings-body">
+    <header class="settings-topbar">
+      <a class="settings-back" href="/">&larr; Dashboard</a>
+      <div class="settings-title">Settings</div>
+      <div class="settings-status" id="status" aria-live="polite"></div>
+    </header>
+
+    <main class="settings-main">
+      <section class="settings-card">
+        <h2>Dashboard</h2>
+        <div class="settings-field">
+          <label for="pollLiveMs">Live poll rate</label>
+          <div class="settings-range">
+            <input type="range" id="pollLiveMs" min="250" max="5000" step="50" />
+            <input type="number" id="pollLiveMsNum" min="250" max="5000" step="50" />
+            <span class="settings-unit">ms</span>
+          </div>
+          <div class="settings-hint">How often the dashboard polls the Riot API while in a game (lower = snappier, more CPU).</div>
+        </div>
+
+        <div class="settings-field">
+          <label for="pollOfflineMs">Idle poll rate</label>
+          <div class="settings-range">
+            <input type="range" id="pollOfflineMs" min="500" max="10000" step="100" />
+            <input type="number" id="pollOfflineMsNum" min="500" max="10000" step="100" />
+            <span class="settings-unit">ms</span>
+          </div>
+          <div class="settings-hint">Polling interval while waiting for a match to start.</div>
+        </div>
+
+        <div class="settings-field">
+          <label for="defaultModifier">Default modifier</label>
+          <select id="defaultModifier"></select>
+          <div class="settings-hint">Shown when no <code>?modifier=</code> query parameter is in the URL.</div>
+        </div>
+
+        <div class="settings-field">
+          <label>Theme</label>
+          <div class="settings-radio">
+            <label><input type="radio" name="theme" value="dark" /> Dark</label>
+            <label><input type="radio" name="theme" value="light" /> Light</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <h2>Network</h2>
+        <div class="settings-field">
+          <label for="riotHost">Riot Live Client host</label>
+          <input type="text" id="riotHost" />
+          <div class="settings-hint">Default <code>127.0.0.1</code>. Change only for remote spectator setups.</div>
+        </div>
+        <div class="settings-field">
+          <label for="riotPort">Riot Live Client port</label>
+          <input type="number" id="riotPort" min="1" max="65535" />
+          <div class="settings-hint">Default <code>2999</code>.</div>
+        </div>
+        <div class="settings-field">
+          <label for="port">Dashboard port <span class="settings-badge">restart required</span></label>
+          <input type="number" id="port" min="1" max="65535" />
+          <div class="settings-hint">The HTTP port the dashboard listens on.</div>
+        </div>
+      </section>
+
+      <section class="settings-card" id="windowCard" hidden>
+        <h2>Window</h2>
+        <div class="settings-field settings-field-toggle">
+          <label class="settings-toggle">
+            <input type="checkbox" id="alwaysOnTop" /> <span>Always on top</span>
+          </label>
+        </div>
+        <div class="settings-field settings-field-toggle">
+          <label class="settings-toggle">
+            <input type="checkbox" id="fullscreen" /> <span>Start in fullscreen</span>
+          </label>
+        </div>
+        <div class="settings-field settings-field-toggle">
+          <label class="settings-toggle">
+            <input type="checkbox" id="lockAspect" /> <span>Lock 16:9 aspect ratio</span>
+          </label>
+        </div>
+        <div class="settings-field settings-field-toggle">
+          <label class="settings-toggle">
+            <input type="checkbox" id="frameless" />
+            <span>Frameless OBS overlay mode <span class="settings-badge">restart required</span></span>
+          </label>
+          <div class="settings-hint">Removes the window chrome and enables transparency so the app can be captured as an overlay.</div>
+        </div>
+        <div class="settings-field settings-field-toggle">
+          <label class="settings-toggle">
+            <input type="checkbox" id="launchAtStartup" /> <span>Launch at system startup</span>
+          </label>
+          <div class="settings-hint" id="launchAtStartupHint">Windows &amp; macOS only.</div>
+        </div>
+        <div class="settings-field">
+          <label for="zoom">Zoom</label>
+          <div class="settings-range">
+            <input type="range" id="zoom" min="0.5" max="2" step="0.05" />
+            <input type="number" id="zoomNum" min="0.5" max="2" step="0.05" />
+            <span class="settings-unit">×</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="settings-actions">
+        <button id="saveBtn" class="settings-btn primary" type="button">Save &amp; reload dashboard</button>
+        <button id="resetBtn" class="settings-btn" type="button">Reset to defaults</button>
+        <div class="settings-config-path" id="configPath"></div>
+      </div>
+    </main>
+
+    <script src="settings.js"></script>
+  </body>
+</html>

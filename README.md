@@ -8,12 +8,16 @@ A 16:9 realtime dashboard for League of Legends ARAM / ARAM Mayhem, designed to 
 
 ## Install (Windows installer — easiest)
 
-Download the latest `aram-dash-setup-<version>.exe` from the
+Download the latest `aram-dash-<version>-win-x64.exe` (NSIS installer) or the
+portable `.exe` from the
 [Releases page](https://github.com/cheesejaguar/aram-dash/releases) and run it.
-The installer bundles Node.js, so nothing else needs to be installed. Launch
-**ARAM Mayhem Dashboard** from the Start Menu and your browser will open
-automatically at `http://localhost:3000`. Close the console window to stop the
-server.
+This is a self-contained desktop app — no Node.js install, no console window,
+no browser required. Launch **ARAM Mayhem Dashboard** from the Start Menu and
+the dashboard opens in its own window. Close the window to quit.
+
+> Older releases shipped as `aram-dash-setup-<version>.exe` (Inno Setup +
+> `pkg`-built console binary that opened your browser). Both build paths are
+> still supported in the repo; the Electron build is now the default.
 
 ## Run from source
 
@@ -30,6 +34,21 @@ The dashboard is then available at:
 
 ```
 http://localhost:3000
+```
+
+To run it as a desktop window (Electron) instead of in a browser:
+
+```powershell
+npm install
+npm run start:electron
+```
+
+To produce a distributable desktop app:
+
+```powershell
+npm run build:app:win    # NSIS installer + portable exe in dist-electron/
+npm run build:app:mac    # .dmg
+npm run build:app:linux  # .AppImage
 ```
 
 ## OBS setup

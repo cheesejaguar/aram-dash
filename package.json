@@ -2,20 +2,27 @@
   "name": "aram-mayhem-dashboard",
   "version": "1.0.0",
   "description": "Realtime 16:9 dashboard for League of Legends ARAM Mayhem, designed as an OBS browser source. Proxies the Riot Live Client Data API at https://127.0.0.1:2999.",
-  "main": "server.js",
+  "main": "electron/main.js",
   "bin": "bin/aram-dash.js",
   "scripts": {
     "start": "node server.js",
-    "build:exe": "pkg . --targets node20-win-x64 --output dist/aram-dash.exe"
+    "start:electron": "electron .",
+    "build:exe": "pkg . --targets node20-win-x64 --output dist/aram-dash.exe",
+    "build:app": "electron-builder",
+    "build:app:win": "electron-builder --win",
+    "build:app:mac": "electron-builder --mac",
+    "build:app:linux": "electron-builder --linux"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.22.2"
   },
   "devDependencies": {
-    "@yao-pkg/pkg": "^5.16.1"
+    "@yao-pkg/pkg": "^5.16.1",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
   },
   "pkg": {
     "scripts": [
@@ -25,5 +32,74 @@
     "assets": [
       "public/**/*"
     ]
+  },
+  "build": {
+    "appId": "com.cheesejaguar.aramdash",
+    "productName": "ARAM Mayhem Dashboard",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "server.js",
+      "public/**/*",
+      "package.json",
+      "!**/node_modules/@yao-pkg/**",
+      "!**/*.{md,iss}",
+      "!installer/**",
+      "!bin/**",
+      "!dist/**",
+      "!dist-electron/**"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "aram-dash-${version}-${os}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ARAM Mayhem Dashboard"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.utilities"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Utility"
+    }
   }
 }
